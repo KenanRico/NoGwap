@@ -35,15 +35,22 @@ func AmazonCrawler(search_phrase string) ([]OnSaleItem, error){
 		return on_sale_items, errors.New("Amazon: "+resp.Status)
 	}
 
-	_ = doc
+	var prev *goquery.Selection = nil
 	doc.Find("span").Each(
 		func(i int, s *goquery.Selection) {
 			attrib1, exists1 := s.Attr("class")
 			attrib2, exists2 := s.Attr("data-a-color")
-			price := s.Find("span").Text()
+			//node := s.Find("span").Nodes[0]
 			if exists1 && exists2 {
-				fmt.Printf("%s, %s\n", attrib1, attrib2)
-				fmt.Printf("%s\n", price)
+				if attrib2 == "secondary" {
+					// if this selection is the element for original price, use this selection and prev to create an OnSaleItem
+					pattrib1, _ := prev.Attr("class")
+					pattrib2, _ := prev.Attr("data-a-color")
+					fmt.Printf("%s, %s, %s\n", pattrib1, pattrib2, prev.Find("span").Text())
+					fmt.Printf("%s, %s, %s\n", attrib1, attrib2, s.Find("span").Text())
+				} else {
+					prev = s
+				}
 			}
 		},
 	)
