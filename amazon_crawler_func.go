@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 	"errors"
-	"fmt"
+	"strconv"
 )
 
 func AmazonCrawler(search_phrase string) ([]OnSaleItem, error){
@@ -35,22 +35,45 @@ func AmazonCrawler(search_phrase string) ([]OnSaleItem, error){
 		return on_sale_items, errors.New("Amazon: "+resp.Status)
 	}
 
-	var prev *goquery.Selection = nil
-	doc.Find("span").Each(
-		func(i int, s *goquery.Selection) {
-			attrib1, exists1 := s.Attr("class")
-			attrib2, exists2 := s.Attr("data-a-color")
-			//node := s.Find("span").Nodes[0]
-			if exists1 && exists2 {
-				if attrib2 == "secondary" {
-					// if this selection is the element for original price, use this selection and prev to create an OnSaleItem
-					pattrib1, _ := prev.Attr("class")
-					pattrib2, _ := prev.Attr("data-a-color")
-					fmt.Printf("%s, %s, %s\n", pattrib1, pattrib2, prev.Find("span").Text())
-					fmt.Printf("%s, %s, %s\n", attrib1, attrib2, s.Find("span").Text())
-				} else {
-					prev = s
-				}
+	doc.Find("div").Each(
+		func(i int, sel *goquery.Selection){
+			_, exists := sel.Attr("data-index")
+			if exists {
+				var name string
+				var prev *goquery.Selection = nil
+				sel.Find("span").Each(
+					func(j int, s *goquery.Selection){
+						attrib1, exists1 := s.Attr("class")
+						attrib2, exists2 := s.Attr("data-a-color")
+						//node := s.Find("span").Nodes[0]
+						if exists1 {
+							if attrib1 == "a-size-base-plus a-color-base" {
+								name += s.Text() + " : "
+							} else if attrib1 == "a-size-base-plus a-color-base a-text-normal"{
+								name += s.Text()
+							}
+							if exists2 {
+								if attrib2 == "secondary" {
+									// if this selection is the element for original price, use this selection and prev to create an OnSaleItem
+									price_sale, _ := strconv.ParseFloat(
+										prev.Find("span").First().Text()[6:],
+										32,
+									)
+									price_orig, _ := strconv.ParseFloat(
+										s.Find("span").First().Text()[6:],
+										32,
+									)
+									on_sale_items = append(
+										on_sale_items,
+										OnSaleItem{name, float32(price_orig), float32(price_sale), "Amazon", "www...."},
+									)
+								} else {
+									prev = s
+								}
+							}
+						}
+					},
+				)
 			}
 		},
 	)

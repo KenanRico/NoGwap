@@ -7,6 +7,7 @@ type CrawlerFunc func(string)([]OnSaleItem, error)
 func AssignCrawlerFunctions() []CrawlerFunc {
 	var funcs []CrawlerFunc
 	funcs = append(funcs, AmazonCrawler)
+	funcs = append(funcs, BestbuyCrawler)
 	return funcs
 }
 
