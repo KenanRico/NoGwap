@@ -41,43 +41,80 @@ func AmazonCrawler(search_phrase string) ([]OnSaleItem, error){
 			if exists {
 				var name string
 				var prev *goquery.Selection = nil
-				sel.Find("span").Each(
-					func(j int, s *goquery.Selection){
-						attrib1, exists1 := s.Attr("class")
-						attrib2, exists2 := s.Attr("data-a-color")
-						//node := s.Find("span").Nodes[0]
-						if exists1 {
-							if attrib1 == "a-size-base-plus a-color-base" {
-								name += s.Text() + " : "
-							} else if attrib1 == "a-size-base-plus a-color-base a-text-normal"{
-								name += s.Text()
-							}
-							if exists2 {
-								if attrib2 == "secondary" {
-									// if this selection is the element for original price, use this selection and prev to create an OnSaleItem
-									price_sale, _ := strconv.ParseFloat(
-										prev.Find("span").First().Text()[6:],
-										32,
-									)
-									price_orig, _ := strconv.ParseFloat(
-										s.Find("span").First().Text()[6:],
-										32,
-									)
-									on_sale_items = append(
-										on_sale_items,
-										OnSaleItem{name, float32(price_orig), float32(price_sale), "Amazon", "www....", "www....png"},
-									)
-								} else {
-									prev = s
-								}
-							}
-						}
-					},
-				)
+				var on_sale_item OnSaleItem
+				var is_on_sale uint8
+				GetNamePrice(sel, &name, prev, &on_sale_item, &is_on_sale)
+				GetLink(sel, &on_sale_item, &is_on_sale)
+				GetImg(sel, &on_sale_item, &is_on_sale)
+				if is_on_sale == 0x7 {
+					on_sale_items = append(on_sale_items, on_sale_item)
+				}
 			}
 		},
 	)
 
 	return on_sale_items, nil
 
+}
+
+
+func GetNamePrice(sel *goquery.Selection, name *string, prev *goquery.Selection, on_sale_item *OnSaleItem, is_on_sale *uint8) {
+	sel.Find("span").Each(
+		func(j int, s *goquery.Selection){
+			attrib1, exists1 := s.Attr("class")
+			attrib2, exists2 := s.Attr("data-a-color")
+			//node := s.Find("span").Nodes[0]
+			if exists1 {
+				if attrib1 == "a-size-base-plus a-color-base" {
+					*name += s.Text() + " : "
+				} else if attrib1 == "a-size-base-plus a-color-base a-text-normal"{
+					*name += s.Text()
+				}
+				if exists2 {
+					if attrib2 == "secondary" {
+						*is_on_sale |= 0x1
+						// if this selection is the element for original price, use this selection and prev to create an OnSaleItem
+						price_sale, _ := strconv.ParseFloat(
+							prev.Find("span").First().Text()[6:],
+							32,
+						)
+						price_orig, _ := strconv.ParseFloat(
+							s.Find("span").First().Text()[6:],
+							32,
+						)
+						on_sale_item.name = *name
+						on_sale_item.price_orig = float32(price_orig)
+						on_sale_item.price_sale = float32(price_sale)
+						on_sale_item.seller = "Amazon"
+					} else {
+						prev = s
+					}
+				}
+			}
+		},
+	)
+}
+
+func GetLink(sel *goquery.Selection, on_sale_item *OnSaleItem, is_on_sale *uint8) {
+	sel.Find("a").Each(
+		func(i int, s *goquery.Selection){
+			link, exists := s.Attr("href")
+			if exists {
+				*is_on_sale |= 0x2
+				on_sale_item.link = "amazon.ca"+link
+			}
+		},
+	)
+}
+
+func GetImg(sel *goquery.Selection, on_sale_item *OnSaleItem, is_on_sale *uint8) {
+	sel.Find("img").Each(
+		func(i int, s *goquery.Selection){
+			imglink, exists := s.Attr("src")
+			if exists {
+				*is_on_sale |= 0x4
+				on_sale_item.img = imglink
+			}
+		},
+	)
 }
