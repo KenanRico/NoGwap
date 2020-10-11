@@ -13,6 +13,7 @@ func AssignCrawlerFunctions() []CrawlerFunc {
 
 func CrawlSellers(crawler_funcs []CrawlerFunc, search_phrase string) []OnSaleItem{
 	var on_sale_items []OnSaleItem
+	// TODO: Change this loop to be multithreaded later on
 	for _, crawler := range crawler_funcs {
 		items, err := crawler(search_phrase)
 		if err != nil {

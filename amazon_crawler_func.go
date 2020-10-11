@@ -65,7 +65,7 @@ func AmazonCrawler(search_phrase string) ([]OnSaleItem, error){
 									)
 									on_sale_items = append(
 										on_sale_items,
-										OnSaleItem{name, float32(price_orig), float32(price_sale), "Amazon", "www...."},
+										OnSaleItem{name, float32(price_orig), float32(price_sale), "Amazon", "www....", "www....png"},
 									)
 								} else {
 									prev = s
