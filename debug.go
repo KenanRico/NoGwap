@@ -8,4 +8,3 @@ func PrintResponse(resp *http.Response) {
 	body_bytes, _ := ioutil.ReadAll(resp.Body)
 	fmt.Printf("%s\n", string(body_bytes))
 }
-

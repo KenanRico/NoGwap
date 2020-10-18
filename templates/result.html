@@ -1,3 +1,34 @@
+<!DOCTYPE html>
+
 <html>
-    haha
+    <script>
+        var osi_str = {{.}};
+        var on_sale_items = JSON.parse(osi_str);
+    </script>
+    <head>
+    </head>
+    <body>
+        <h1>
+            result page
+        </h1>
+        <p>
+            <script>
+                document.writeln("Found "+on_sale_items.length+" items <hr/>");
+            </script>
+        </p>
+        <p>
+            <script>
+                for(i=0; i<on_sale_items.length; i++){
+                    document.writeln("<p> <hr/>")
+                    document.writeln("<br/>"+on_sale_items[i].Name)
+                    document.writeln("<br/>"+on_sale_items[i].Price_orig)
+                    document.writeln("<br/>"+on_sale_items[i].Price_sale)
+                    document.writeln("<br/>"+"Seller: "+on_sale_items[i].Seller)
+                    document.writeln("<br/>"+on_sale_items[i].Link)
+                    document.writeln("<br/>"+on_sale_items[i].Img)
+                    document.writeln("</p>")
+                }
+            </script>
+        </p>
+    </body>
 </html>
