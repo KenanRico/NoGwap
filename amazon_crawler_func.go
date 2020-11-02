@@ -19,7 +19,6 @@ func AmazonCrawler(search_phrase string) ([]OnSaleItem, error){
 	if err != nil {
 		return on_sale_items, errors.New("Amazon: "+err.Error())
 	}
-	//request.Header.Set("", "")
 	resp, err := new(http.Client).Do(request)
 	if err != nil {
 		return on_sale_items, errors.New("Amazon: "+err.Error())
@@ -39,15 +38,9 @@ func AmazonCrawler(search_phrase string) ([]OnSaleItem, error){
 		func(i int, sel *goquery.Selection){
 			_, exists := sel.Attr("data-index")
 			if exists {
-				var name string
-				var prev *goquery.Selection = nil
 				var on_sale_item OnSaleItem
-				if GetNamePrice(sel, &name, prev, &on_sale_item) {
-					if GetLink(sel, &on_sale_item) {
-						if GetImg(sel, &on_sale_item){
+				if GetNamePrice(sel, &on_sale_item) && GetLink(sel, &on_sale_item) && GetImg(sel, &on_sale_item) {
 							on_sale_items = append(on_sale_items, on_sale_item)
-						}
-					}
 				}
 			}
 		},
@@ -58,8 +51,10 @@ func AmazonCrawler(search_phrase string) ([]OnSaleItem, error){
 }
 
 
-func GetNamePrice(sel *goquery.Selection, name *string, prev *goquery.Selection, on_sale_item *OnSaleItem) bool {
+func GetNamePrice(sel *goquery.Selection, on_sale_item *OnSaleItem) bool {
 	success := false
+	var prev *goquery.Selection
+	var name string
 	sel.Find("span").Each(
 		func(j int, s *goquery.Selection){
 			attrib1, exists1 := s.Attr("class")
@@ -67,9 +62,9 @@ func GetNamePrice(sel *goquery.Selection, name *string, prev *goquery.Selection,
 			//node := s.Find("span").Nodes[0]
 			if exists1 {
 				if attrib1 == "a-size-base-plus a-color-base" {
-					*name += s.Text() + " : "
+					name += s.Text() + " : "
 				} else if attrib1 == "a-size-base-plus a-color-base a-text-normal"{
-					*name += s.Text()
+					name += s.Text()
 				}
 				if exists2 {
 					if attrib2 == "secondary" && !success {
@@ -83,7 +78,7 @@ func GetNamePrice(sel *goquery.Selection, name *string, prev *goquery.Selection,
 							s.Find("span").First().Text()[6:],
 							32,
 						)
-						on_sale_item.Name = *name
+						on_sale_item.Name = name
 						on_sale_item.Price_orig = float32(price_orig)
 						on_sale_item.Price_sale = float32(price_sale)
 						on_sale_item.Seller = "Amazon"
@@ -104,7 +99,7 @@ func GetLink(sel *goquery.Selection, on_sale_item *OnSaleItem) bool {
 			link, exists := s.Attr("href")
 			if exists && !success {
 				success = true
-				on_sale_item.Link = "amazon.ca"+link
+				on_sale_item.Link = "https://www.amazon.ca"+link
 				return
 			}
 		},

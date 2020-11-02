@@ -1,34 +1,88 @@
 <!DOCTYPE html>
 
 <html>
+    <head>
+        <style type="text/css">
+            * {
+                box-sizing: border-box;
+            }
+            .items{
+                width: 100%;
+                float: left;
+                border: 3px solid rgb(200,200,200);
+            }
+            .item{
+                position: relative;
+                width: 33%;
+                height: 500px;
+                float: left;
+                padding: 10px;
+                margin: 1px;
+                border: 1px solid rgb(100, 100, 100);
+            }
+            .image{
+                position: absolute;
+                margin-left: auto;
+                margin-right: auto;
+                margin-bottom: auto;
+                width: 30%;
+                height: 30%;
+                position: absolute;
+            }
+            .description{
+                position: absolute;
+                text-align: center;
+                bottom: 0;
+            }
+            a.link{
+                color: rgb(20, 20, 20);
+                font-size: larger;
+                font-style: inherit;
+                font-family: 'Trebuchet MS';
+                text-decoration: none;
+            }
+            a:hover{
+                color:rgb(20,30,160);
+            }
+            .price{
+                color:rgb(30, 10, 10);
+                font-size:large;
+                font-family: 'Trebuchet MS';
+            }
+        </style>
+    </head>
     <script>
         var osi_str = {{.}};
         var on_sale_items = JSON.parse(osi_str);
     </script>
-    <head>
-    </head>
     <body>
-        <h1>
-            result page
-        </h1>
-        <p>
-            <script>
-                document.writeln("Found "+on_sale_items.length+" items <hr/>");
-            </script>
-        </p>
-        <p>
+        <div>
+            <h1>
+                <script>
+                    document.writeln(on_sale_items.length+" results found");
+                </script>
+                <form method="POST">
+                    <div>
+                        <button type="submit", onclick="location.href='/'">back</button>
+                    </div>
+                </form>
+            </h1>
+        </div>
+        <div class="items">
             <script>
                 for(i=0; i<on_sale_items.length; i++){
-                    document.writeln("<p> <hr/>")
-                    document.writeln("<br/>"+on_sale_items[i].Name)
-                    document.writeln("<br/>"+on_sale_items[i].Price_orig)
-                    document.writeln("<br/>"+on_sale_items[i].Price_sale)
-                    document.writeln("<br/>"+"Seller: "+on_sale_items[i].Seller)
-                    document.writeln("<br/>"+on_sale_items[i].Link)
-                    document.writeln("<br/>"+on_sale_items[i].Img)
-                    document.writeln("</p>")
+                    document.writeln("<div class=\"item\">");
+                    document.writeln("<div class=\"image\">");
+                    document.writeln("<img src=\""+on_sale_items[i].Img+"\">");
+                    document.writeln("</div>")
+                    document.writeln("<div class=\"description\">");
+                    document.writeln("<br/><p><a class=\"link\" href=\""+on_sale_items[i].Link+"\">"+on_sale_items[i].Name+"</a></p>");
+                    document.writeln("<p class=\"price\"><strike class=\"old\">"+"CAD$ "+on_sale_items[i].Price_orig+"</strike>");
+                    document.writeln("CAD$ "+on_sale_items[i].Price_sale+"</p>");
+                    document.writeln("</div>")
+                    document.writeln("</div>");
                 }
             </script>
-        </p>
+        </div>
     </body>
 </html>
